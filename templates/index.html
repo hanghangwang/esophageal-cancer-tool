@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Esophageal Cancer Treatment Tool</title>
+    <style>
+        :root {
+            --primary: #1b6ec2;
+            --primary-dark: #155a9a;
+            --bg-gradient-start: #e0ecff;
+            --bg-gradient-end: #f7fbff;
+            --glass-bg: rgba(255, 255, 255, 0.16);
+            --glass-border: rgba(255, 255, 255, 0.35);
+            --text: #1f2933;
+            --subtext: #5f6f81;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text);
+            background: radial-gradient(circle at top left, var(--bg-gradient-start), var(--bg-gradient-end));
+            min-height: 100vh;
+        }
+
+        /* Layout */
+        .layout {
+            display: grid;
+            grid-template-columns: 260px minmax(0, 1fr);
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+            gap: 24px;
+        }
+
+        @media (max-width: 900px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: sticky;
+            top: 24px;
+            align-self: start;
+            border-radius: 20px;
+            padding: 20px 18px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.65), rgba(255,255,255,0.22));
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.7);
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.18);
+        }
+
+        .sidebar-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 4px;
+        }
+
+        .sidebar-subtitle {
+            font-size: 0.85rem;
+            color: var(--subtext);
+            margin-bottom: 14px;
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .nav-item {
+            margin-bottom: 6px;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 8px 10px;
+            border-radius: 10px;
+            font-size: 0.92rem;
+            color: var(--subtext);
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s, transform 0.1s;
+        }
+
+        .nav-link:hover {
+            background: rgba(27,110,194,0.08);
+            color: var(--primary-dark);
+            transform: translateX(2px);
+        }
+
+        .nav-link strong {
+            font-weight: 600;
+        }
+
+        .sidebar-footer {
+            margin-top: 14px;
+            font-size: 0.8rem;
+            color: var(--subtext);
+        }
+
+        /* Main content */
+        .main {
+            border-radius: 24px;
+            padding: 24px 24px 32px;
+            background: linear-gradient(145deg, rgba(255,255,255,0.9), rgba(255,255,255,0.6));
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255,255,255,0.8);
+            box-shadow: 0 22px 55px rgba(15, 23, 42, 0.25);
+        }
+
+        .main-header {
+            margin-bottom: 16px;
+        }
+
+        .main-title {
+            margin: 0;
+            font-size: 1.6rem;
+            font-weight: 650;
+            color: var(--primary-dark);
+        }
+
+        .main-subtitle {
+            margin: 4px 0 0;
+            font-size: 0.9rem;
+            color: var(--subtext);
+        }
+
+        /* Sections - collapsible */
+        .section-card {
+            border-radius: 18px;
+            margin-top: 18px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            box-shadow: 0 10px 30px rgba(15,23,42,0.16);
+            overflow: hidden;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px 12px;
+            cursor: pointer;
+        }
+
+        .section-header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-badge {
+            width: 26px;
+            height: 26px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #1b6ec2, #4f9dff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .section-title-text {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .section-desc {
+            font-size: 0.8rem;
+            color: var(--subtext);
+        }
+
+        .section-toggle-icon {
+            font-size: 1.1rem;
+            color: var(--subtext);
+            transition: transform 0.2s;
+        }
+
+        .section-card.collapsed .section-toggle-icon {
+            transform: rotate(-90deg);
+        }
+
+        .section-body {
+            padding: 0 16px 16px;
+            border-top: 1px solid rgba(255,255,255,0.4);
+            animation: expandDown 0.2s ease-out;
+        }
+
+        @keyframes expandDown {
+            from { opacity: 0; transform: translateY(-6px); }
+            to   { opacity: 1; transform: translateY(0);    }
+        }
+
+        .section-card.collapsed .section-body {
+            display: none;
+        }
+
+        /* Form elements */
+        label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--subtext);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(170, 184, 205, 0.9);
+            margin-top: 4px;
+            margin-bottom: 14px;
+            font-size: 0.9rem;
+            background: rgba(255,255,255,0.85);
+        }
+
+        textarea {
+            min-height: 70px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 1px rgba(27,110,194,0.1);
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px 18px;
+        }
+
+        @media (max-width: 900px) {
+            .two-col {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .inline-checkbox {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 6px 10px;
+            margin-bottom: 10px;
+        }
+
+        .inline-checkbox label {
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+            font-weight: 400;
+            color: var(--text);
+            font-size: 0.88rem;
+        }
+
+        .inline-checkbox input {
+            width: auto;
+            margin-top: 2px;
+        }
+
+        .submit-wrapper {
+            margin-top: 20px;
+        }
+
+        .submit-button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #1b6ec2, #4f9dff);
+            color: white;
+            border: none;
+            border-radius: 999px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 12px 30px rgba(15,23,42,0.25);
+            transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.1s ease;
+        }
+
+        .submit-button:hover {
+            filter: brightness(1.03);
+            transform: translateY(-1px);
+            box-shadow: 0 14px 34px rgba(15,23,42,0.3);
+        }
+
+        .submit-button:active {
+            transform: translateY(0);
+            box-shadow: 0 10px 24px rgba(15,23,42,0.2);
+        }
+
+        /* Results & references */
+        .result-box {
+            margin-top: 26px;
+            padding: 18px 20px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(233,242,255,0.95), rgba(219,233,255,0.9));
+            border: 1px solid rgba(167, 193, 235, 0.9);
+            box-shadow: 0 14px 36px rgba(15,23,42,0.25);
+        }
+
+        .result-box h2 {
+            margin-top: 0;
+            border-left: 0;
+            padding-left: 0;
+            color: var(--primary-dark);
+        }
+
+        .references-card {
+            margin-top: 22px;
+            padding: 18px 22px;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.85);
+            border: 1px solid rgba(213, 222, 240, 0.9);
+            box-shadow: 0 10px 26px rgba(15,23,42,0.2);
+        }
+
+        .references-card h2 {
+            margin-top: 0;
+            border-left: 0;
+            padding-left: 0;
+            color: #333;
+        }
+
+        .ref-category {
+            margin-top: 12px;
+            font-weight: 600;
+            color: var(--subtext);
+            font-size: 0.95rem;
+        }
+
+        .ref-item {
+            margin-left: 12px;
+            margin-bottom: 3px;
+            font-size: 0.9rem;
+        }
+
+        a {
+            color: var(--primary-dark);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .result-actions {
+            margin-top: 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .secondary-button {
+            padding: 8px 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(27,110,194,0.6);
+            background: rgba(255,255,255,0.95);
+            color: var(--primary-dark);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+        }
+
+        .secondary-button:hover {
+            background: rgba(227, 237, 255, 0.9);
+            box-shadow: 0 8px 22px rgba(15,23,42,0.2);
+            transform: translateY(-1px);
+        }
+
+        .secondary-button:active {
+            transform: translateY(0);
+            box-shadow: 0 5px 16px rgba(15,23,42,0.15);
+        }
+    </style>
+</head>
+
+<body>
+<div class="layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-title">Navigation</div>
+        <div class="sidebar-subtitle">Jump to a section</div>
+        <ul class="nav-list">
+            <li class="nav-item"><a class="nav-link" data-scroll="#section-patient"><strong>1.</strong> Patient & Tumor</a></li>
+            <li class="nav-item"><a class="nav-link" data-scroll="#section-imaging"><strong>2.</strong> Imaging & Staging</a></li>
+            <li class="nav-item"><a class="nav-link" data-scroll="#section-comorbid"><strong>3.</strong> Comorbidities</a></li>
+            <li class="nav-item"><a class="nav-link" data-scroll="#section-biomarkers"><strong>4.</strong> Biomarkers</a></li>
+            <li class="nav-item"><a class="nav-link" data-scroll="#section-results"><strong>5.</strong> Results</a></li>
+        </ul>
+
+        <div class="sidebar-footer">
+            NCCN v4.2025-aligned patterns.<br>
+            Use for MDT preparation, not as a substitute for clinical judgment.
+        </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main">
+        <div class="main-header">
+            <h1 class="main-title">Esophageal Cancer Treatment Recommendation Tool</h1>
+            <p class="main-subtitle">
+                Structured inputs → NCCN-guideline–aligned suggestion. Outputs are for multidisciplinary discussion.
+            </p>
+        </div>
+
+        <form method="POST">
+
+            <!-- Patient basics -->
+            <section id="section-patient" class="section-card">
+                <div class="section-header">
+                    <div class="section-header-left">
+                        <div class="section-badge">1</div>
+                        <div>
+                            <div class="section-title-text">Patient & Tumor Basics</div>
+                            <div class="section-desc">Core clinical and pathologic descriptors</div>
+                        </div>
+                    </div>
+                    <div class="section-toggle-icon">▾</div>
+                </div>
+                <div class="section-body">
+                    <div class="two-col">
+                        <div>
+                            <label>Age</label>
+                            <input type="number" name="age" min="0" required
+                                   value="{{ request.form.get('age', '') }}">
+                        </div>
+
+                        <div>
+                            <label>TNM Stage</label>
+                            <input type="text" name="stage" placeholder="e.g., T3N1M0" required
+                                   value="{{ request.form.get('stage', '') }}">
+                        </div>
+
+                        <div>
+                            <label>Histology</label>
+                            <select name="histology">
+                                <option value="adenocarcinoma"
+                                    {% if request.form.get('histology', 'adenocarcinoma') == 'adenocarcinoma' %}selected{% endif %}>
+                                    Adenocarcinoma
+                                </option>
+                                <option value="squamous"
+                                    {% if request.form.get('histology') == 'squamous' %}selected{% endif %}>
+                                    Squamous Cell Carcinoma
+                                </option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label>Tumor Size (cm)</label>
+                            <input type="number" step="0.1" name="tumour_size_cm"
+                                   value="{{ request.form.get('tumour_size_cm', '') }}">
+                        </div>
+
+                        <div>
+                            <label>Grade</label>
+                            <select name="grade">
+                                <option value=""
+                                    {% if not request.form.get('grade') %}selected{% endif %}>-- Select --</option>
+                                <option value="well"
+                                    {% if request.form.get('grade') == 'well' %}selected{% endif %}>
+                                    Well Differentiated
+                                </option>
+                                <option value="moderate"
+                                    {% if request.form.get('grade') == 'moderate' %}selected{% endif %}>
+                                    Moderately Differentiated
+                                </option>
+                                <option value="poorly differentiated"
+                                    {% if request.form.get('grade') == 'poorly differentiated' %}selected{% endif %}>
+                                    Poorly Differentiated
+                                </option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label>Lymphovascular Invasion</label>
+                            <select name="lvi">
+                                <option value="no"
+                                    {% if request.form.get('lvi', 'no') == 'no' %}selected{% endif %}>No</option>
+                                <option value="yes"
+                                    {% if request.form.get('lvi') == 'yes' %}selected{% endif %}>Yes</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Imaging -->
+            <section id="section-imaging" class="section-card collapsed">
+                <div class="section-header">
+                    <div class="section-header-left">
+                        <div class="section-badge">2</div>
+                        <div>
+                            <div class="section-title-text">Imaging & Local Staging</div>
+                            <div class="section-desc">Location, invasion, nodes, metastases</div>
+                        </div>
+                    </div>
+                    <div class="section-toggle-icon">▾</div>
+                </div>
+                <div class="section-body">
+                    <label>Tumor Location (Imaging/EUS)</label>
+                    <select name="tumour_location">
+                        <option value=""
+                            {% if not request.form.get('tumour_location') %}selected{% endif %}>-- Select --</option>
+                        <option value="cervical"
+                            {% if request.form.get('tumour_location') == 'cervical' %}selected{% endif %}>
+                            Cervical esophagus
+                        </option>
+                        <option value="upper_thoracic"
+                            {% if request.form.get('tumour_location') == 'upper_thoracic' %}selected{% endif %}>
+                            Upper thoracic
+                        </option>
+                        <option value="mid_thoracic"
+                            {% if request.form.get('tumour_location') == 'mid_thoracic' %}selected{% endif %}>
+                            Mid-thoracic
+                        </option>
+                        <option value="distal_thoracic"
+                            {% if request.form.get('tumour_location') == 'distal_thoracic' %}selected{% endif %}>
+                            Distal thoracic
+                        </option>
+                        <option value="gej_siewert1"
+                            {% if request.form.get('tumour_location') == 'gej_siewert1' %}selected{% endif %}>
+                            GEJ – Siewert I
+                        </option>
+                        <option value="gej_siewert2"
+                            {% if request.form.get('tumour_location') == 'gej_siewert2' %}selected{% endif %}>
+                            GEJ – Siewert II
+                        </option>
+                        <option value="gej_siewert3"
+                            {% if request.form.get('tumour_location') == 'gej_siewert3' %}selected{% endif %}>
+                            GEJ – Siewert III
+                        </option>
+                    </select>
+
+                    <label>Local Invasion (check all that apply)</label>
+                    <div class="inline-checkbox">
+                        <label>
+                            <input type="checkbox" name="inv_none"
+                                   {% if request.form.get('inv_none') %}checked{% endif %}>
+                            No invasion beyond wall
+                        </label>
+                        <label>
+                            <input type="checkbox" name="inv_adventitial"
+                                   {% if request.form.get('inv_adventitial') %}checked{% endif %}>
+                            Adventitial involvement
+                        </label>
+                        <label>
+                            <input type="checkbox" name="inv_airway"
+                                   {% if request.form.get('inv_airway') %}checked{% endif %}>
+                            Airway invasion
+                        </label>
+                        <label>
+                            <input type="checkbox" name="inv_aorta"
+                                   {% if request.form.get('inv_aorta') %}checked{% endif %}>
+                            Aortic encasement
+                        </label>
+                        <label>
+                            <input type="checkbox" name="inv_vertebral"
+                                   {% if request.form.get('inv_vertebral') %}checked{% endif %}>
+                            Vertebral body involvement
+                        </label>
+                        <label>
+                            <input type="checkbox" name="inv_diaphragm"
+                                   {% if request.form.get('inv_diaphragm') %}checked{% endif %}>
+                            Diaphragm involvement
+                        </label>
+                        <label>
+                            <input type="checkbox" name="inv_pericardium"
+                                   {% if request.form.get('inv_pericardium') %}checked{% endif %}>
+                            Pericardial involvement
+                        </label>
+                        <label>
+                            <input type="checkbox" name="inv_pleural"
+                                   {% if request.form.get('inv_pleural') %}checked{% endif %}>
+                            Pleural carcinomatosis
+                        </label>
+                    </div>
+
+                    <label>Nodal regions (suspicious on imaging)</label>
+                    <div class="inline-checkbox">
+                        <label>
+                            <input type="checkbox" name="node_mediastinal"
+                                   {% if request.form.get('node_mediastinal') %}checked{% endif %}>
+                            Mediastinal nodes
+                        </label>
+                        <label>
+                            <input type="checkbox" name="node_celiac"
+                                   {% if request.form.get('node_celiac') %}checked{% endif %}>
+                            Celiac nodes
+                        </label>
+                        <label>
+                            <input type="checkbox" name="node_supraclavicular"
+                                   {% if request.form.get('node_supraclavicular') %}checked{% endif %}>
+                            Supraclavicular nodes
+                        </label>
+                        <label>
+                            <input type="checkbox" name="node_retroperitoneal"
+                                   {% if request.form.get('node_retroperitoneal') %}checked{% endif %}>
+                            Retroperitoneal nodes
+                        </label>
+                    </div>
+
+                    <label>Distant metastases</label>
+                    <div class="inline-checkbox">
+                        <label>
+                            <input type="checkbox" name="met_liver"
+                                   {% if request.form.get('met_liver') %}checked{% endif %}>
+                            Liver
+                        </label>
+                        <label>
+                            <input type="checkbox" name="met_lung"
+                                   {% if request.form.get('met_lung') %}checked{% endif %}>
+                            Lung
+                        </label>
+                        <label>
+                            <input type="checkbox" name="met_bone"
+                                   {% if request.form.get('met_bone') %}checked{% endif %}>
+                            Bone
+                        </label>
+                        <label>
+                            <input type="checkbox" name="met_brain"
+                                   {% if request.form.get('met_brain') %}checked{% endif %}>
+                            Brain
+                        </label>
+                        <label>
+                            <input type="checkbox" name="met_peritoneal"
+                                   {% if request.form.get('met_peritoneal') %}checked{% endif %}>
+                            Peritoneal
+                        </label>
+                        <label>
+                            <input type="checkbox" name="met_distant_nodes"
+                                   {% if request.form.get('met_distant_nodes') %}checked{% endif %}>
+                            Distant nodes
+                        </label>
+                    </div>
+
+                    <label>Other metastatic sites</label>
+                    <input type="text" name="met_other" placeholder="e.g., adrenal, ovary"
+                           value="{{ request.form.get('met_other', '') }}">
+
+                    <label>Additional imaging comments</label>
+                    <textarea name="imaging_findings"
+                              placeholder="EUS nuances, PET findings, borderline features, etc.">{{ request.form.get('imaging_findings', '') }}</textarea>
+                </div>
+            </section>
+
+            <!-- Comorbidities -->
+            <section id="section-comorbid" class="section-card collapsed">
+                <div class="section-header">
+                    <div class="section-header-left">
+                        <div class="section-badge">3</div>
+                        <div>
+                            <div class="section-title-text">Comorbidities & Functional Status</div>
+                            <div class="section-desc">Surgical and systemic therapy fitness</div>
+                        </div>
+                    </div>
+                    <div class="section-toggle-icon">▾</div>
+                </div>
+                <div class="section-body">
+                    <label>Important comorbidities (check all that apply)</label>
+                    <div class="inline-checkbox">
+                        <label>
+                            <input type="checkbox" name="comorb_severe_pulm"
+                                   {% if request.form.get('comorb_severe_pulm') %}checked{% endif %}>
+                            Severe pulmonary disease
+                        </label>
+                        <label>
+                            <input type="checkbox" name="comorb_severe_card"
+                                   {% if request.form.get('comorb_severe_card') %}checked{% endif %}>
+                            Cardiac disease / HF / CAD
+                        </label>
+                        <label>
+                            <input type="checkbox" name="comorb_frailty"
+                                   {% if request.form.get('comorb_frailty') %}checked{% endif %}>
+                            Frailty / ECOG ≥ 2
+                        </label>
+                        <label>
+                            <input type="checkbox" name="comorb_ckd"
+                                   {% if request.form.get('comorb_ckd') %}checked{% endif %}>
+                            Chronic kidney disease
+                        </label>
+                        <label>
+                            <input type="checkbox" name="comorb_liver"
+                                   {% if request.form.get('comorb_liver') %}checked{% endif %}>
+                            Liver disease / cirrhosis
+                        </label>
+                        <label>
+                            <input type="checkbox" name="comorb_prior_rt"
+                                   {% if request.form.get('comorb_prior_rt') %}checked{% endif %}>
+                            Prior chest/upper abdominal RT
+                        </label>
+                        <label>
+                            <input type="checkbox" name="comorb_autoimmune"
+                                   {% if request.form.get('comorb_autoimmune') %}checked{% endif %}>
+                            Autoimmune disease (IO-relevant)
+                        </label>
+                        <label>
+                            <input type="checkbox" name="comorb_diabetes"
+                                   {% if request.form.get('comorb_diabetes') %}checked{% endif %}>
+                            Diabetes
+                        </label>
+                        <label>
+                            <input type="checkbox" name="comorb_malnutrition"
+                                   {% if request.form.get('comorb_malnutrition') %}checked{% endif %}>
+                            Malnutrition / BMI &lt; 18.5
+                        </label>
+                    </div>
+
+                    <label>Other comorbidities</label>
+                    <input type="text" name="comorbidities_other" placeholder="e.g., severe AS, OSA on CPAP"
+                           value="{{ request.form.get('comorbidities_other', '') }}">
+
+                    <label>Surgical candidate?</label>
+                    <select name="surgical_candidate">
+                        <option value="yes"
+                            {% if request.form.get('surgical_candidate', 'yes') == 'yes' %}selected{% endif %}>
+                            Yes – acceptable surgical risk
+                        </option>
+                        <option value="no"
+                            {% if request.form.get('surgical_candidate') == 'no' %}selected{% endif %}>
+                            No – not a surgical candidate
+                        </option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- Biomarkers -->
+            <section id="section-biomarkers" class="section-card collapsed">
+                <div class="section-header">
+                    <div class="section-header-left">
+                        <div class="section-badge">4</div>
+                        <div>
+                            <div class="section-title-text">Biomarkers</div>
+                            <div class="section-desc">Immunotherapy and targeted therapy eligibility</div>
+                        </div>
+                    </div>
+                    <div class="section-toggle-icon">▾</div>
+                </div>
+                <div class="section-body">
+                    <div class="two-col">
+                        <div>
+                            <label>HER2</label>
+                            <select name="her2">
+                                <option value="negative"
+                                    {% if request.form.get('her2', 'negative') == 'negative' %}selected{% endif %}>
+                                    Negative
+                                </option>
+                                <option value="positive"
+                                    {% if request.form.get('her2') == 'positive' %}selected{% endif %}>
+                                    Positive
+                                </option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label>PD-L1 CPS (numeric)</label>
+                            <input type="number" step="0.1" name="pdl1" placeholder="e.g., 0, 1, 5, 10, 50"
+                                   value="{{ request.form.get('pdl1', '') }}">
+                        </div>
+
+                        <div>
+                            <label>MSI Status</label>
+                            <select name="msi">
+                                <option value="negative"
+                                    {% if request.form.get('msi', 'negative') == 'negative' %}selected{% endif %}>
+                                    MSS
+                                </option>
+                                <option value="positive"
+                                    {% if request.form.get('msi') == 'positive' %}selected{% endif %}>
+                                    MSI-H / dMMR
+                                </option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label>CLDN18.2</label>
+                            <select name="cldn">
+                                <option value="negative"
+                                    {% if request.form.get('cldn', 'negative') == 'negative' %}selected{% endif %}>
+                                    Negative
+                                </option>
+                                <option value="positive"
+                                    {% if request.form.get('cldn') == 'positive' %}selected{% endif %}>
+                                    Positive
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="submit-wrapper">
+                <button type="submit" class="submit-button">
+                    Generate Treatment Recommendation
+                </button>
+            </div>
+        </form>
+
+        <section id="section-results">
+            {% if result %}
+            <div class="result-box" id="result-box">
+                <h2>Treatment Summary</h2>
+                <p>{{ result.summary|safe }}</p>
+
+                <h2>Detailed Explanation</h2>
+                <p>{{ result.details|safe }}</p>
+
+                <div class="result-actions">
+                    <button type="button" class="secondary-button" id="copy-btn">
+                        Copy to Clipboard
+                    </button>
+                    <button type="button" class="secondary-button" id="print-btn">
+                        Print / Save as PDF
+                    </button>
+                </div>
+            </div>
+
+            <div class="references-card">
+                <h2>Key References</h2>
+                {% for category, papers in references.items() %}
+                    <div class="ref-category">{{ category }}</div>
+                    {% for name, url in papers %}
+                        <div class="ref-item">• <a href="{{ url }}" target="_blank" rel="noopener noreferrer">{{ name }}</a></div>
+                    {% endfor %}
+                {% endfor %}
+                <p style="margin-top: 10px; font-size: 0.8rem; color: var(--subtext);">
+                    This tool summarizes guideline-concordant patterns for MDT discussion. Final management should be individualized to the patient.
+                </p>
+            </div>
+            {% endif %}
+        </section>
+    </main>
+</div>
+
+<script>
+    // Smooth scroll for sidebar links
+    document.querySelectorAll('.nav-link').forEach(function (link) {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('data-scroll'));
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+
+    // Collapsible sections
+    document.querySelectorAll('.section-card').forEach(function (card, index) {
+        const header = card.querySelector('.section-header');
+        header.addEventListener('click', function () {
+            card.classList.toggle('collapsed');
+        });
+
+        // First card expanded by default
+        if (index === 0) {
+            card.classList.remove('collapsed');
+        }
+    });
+
+    // Copy + Print actions
+    document.addEventListener('DOMContentLoaded', function () {
+        const copyBtn = document.getElementById('copy-btn');
+        const printBtn = document.getElementById('print-btn');
+        const resultBox = document.getElementById('result-box');
+
+        if (copyBtn && resultBox && navigator.clipboard) {
+            copyBtn.addEventListener('click', function () {
+                const text = resultBox.innerText.trim();
+                navigator.clipboard.writeText(text).then(function () {
+                    alert('Result copied to clipboard.');
+                }).catch(function () {
+                    alert('Unable to copy to clipboard. Your browser may not support this feature.');
+                });
+            });
+        } else if (copyBtn && resultBox) {
+            copyBtn.addEventListener('click', function () {
+                alert('Clipboard API not available in this browser. You can still manually select and copy the text.');
+            });
+        }
+
+        if (printBtn) {
+            printBtn.addEventListener('click', function () {
+                window.print();
+            });
+        }
+    });
+</script>
+
+</body>
+</html>
